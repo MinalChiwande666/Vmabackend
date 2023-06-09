@@ -2,6 +2,7 @@ import express from 'express'
 import memberreg from '../Model/Member.js'
 import nodemailer from 'nodemailer'
 
+
 import jwt from 'jsonwebtoken'
 
 const router = express.Router()
@@ -14,9 +15,21 @@ router.post("/checkmembertype", async (req, res) => {
     membertype: req.body.membertype
   })
   res.send(memreg)
-})
+})      
 
 router.post("/register_member", async (req, res) => {
+
+  const {email} = req.body;
+
+  // Check if email already exists in the database
+  const existingMember = await memberreg.findOne({ email });
+  if (existingMember) {
+    return res.status(400).json({
+      code: 400,
+      message: 'Email already exists in the database',
+    });
+  }
+else{
   let member = new memberreg({
     membertype: req.body.membertype,
     type_id:req.body.type_id,
@@ -46,6 +59,7 @@ router.post("/register_member", async (req, res) => {
       message: 'Something went wrong'
     })
   }
+}
 })
 
 const getemail = async(email,otp) => {
